@@ -1,0 +1,19 @@
+name: mercadolivre_challenge
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip:
+    - jupyterlab==4.3.5
+    - pandas==2.1.4
+    - ydata-profiling==4.12.2
+    - scikit-learn==1.4.2
+    - matplotlib==3.7.5
+    - pycaret==3.3.2
+    - numpy==1.26.4
+    - openpyxl==3.1.5
+    - xgboost==2.1.4
+    - uvicorn
+    - fastapi
+
