@@ -79,5 +79,3 @@ ML Challenge/
 ├── README.md                                   # Este arquivo
 └── .gitignore                                  # Arquivos e pastas a serem ignorados pelo Git
 ```
-
-
