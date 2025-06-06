@@ -16,4 +16,5 @@ dependencies:
     - xgboost==2.1.4
     - uvicorn
     - fastapi
+    - holidays
 

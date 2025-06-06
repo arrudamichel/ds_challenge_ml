@@ -7,9 +7,17 @@ import holidays
 
 app = FastAPI()
 
-model = joblib.load("model/model.pkl")
-store_depts = joblib.load("model/depts.pkl")
-stores = joblib.load("model/stores.pkl")
+try:
+    model = joblib.load("model/model.pkl")
+    store_depts = joblib.load("model/store_depts.pkl")
+    stores = joblib.load("model/stores.pkl")
+
+    type_encoded_dict = joblib.load("model/type_encode.pkl")
+    dept_encoded_dict = joblib.load("model/dept_encode.pkl")
+    store_encoded_dict = joblib.load("model/store_encode.pkl")
+    month_encoded_dict = joblib.load("model/month_encode.pkl")
+except Exception as e:
+    print(e)
 
 # Obter o calendário de feriados dos EUA para 2013
 us_holidays = holidays.US(years=2013)
@@ -33,6 +41,25 @@ def add_month(df):
     df['Month'] = df['Date'].dt.month
     return df
 
+def add_encode(df):
+    flat_mapping = {k: v['Month_encoded'] for k, v in month_encoded_dict.items()}
+    df['Month_encoded'] = df['Month'].map(flat_mapping)
+    df['Month_encoded']
+
+    flat_mapping = {k: v['Type_encoded'] for k, v in type_encoded_dict.items()}
+    df['Type_encoded'] = df['Type'].map(flat_mapping)
+    df['Type_encoded']
+
+    
+    flat_mapping = {int(k): v['Dept_encoded'] for k, v in dept_encoded_dict.items()}
+    df['Dept_encoded'] = df['Dept'].map(flat_mapping)
+    df['Dept_encoded']
+
+    flat_mapping = {k: v['Store_encoded'] for k, v in store_encoded_dict.items()}
+    df['Store_encoded'] = df['Store'].map(flat_mapping)
+    df['Store_encoded']
+
+    return df
 
 class PredictRequest(BaseModel):
     store: int
@@ -55,8 +82,14 @@ def predict_sales(req: PredictRequest):
     df = add_holiday(df)
     df = add_month(df)
     df = add_store_features(df, store_features)
+    df = add_encode(df)
     
-    features = ['Store', 'Dept', 'IsHoliday', 'Type', 'Size', 'Month']
+    features = ['Store_encoded', 'Dept_encoded', 'IsHoliday', 'Type_encoded', 'Size', 'Month_encoded']
+    print(df.columns)
+    print(df[features])
+
 
     df["PredictedSales"] = model.predict(df[features])
-    return df.to_dict(orient="records")
+
+    response_features = ['Date', 'Dept', 'IsHoliday', 'PredictedSales']
+    return df[response_features].to_dict(orient="records")
